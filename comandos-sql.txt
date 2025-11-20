@@ -1,0 +1,28 @@
+create table cliente (
+    id uuid not null primary key,
+    nome varchar(100) not null,
+    data_nascimento date not null,
+    nacionalidade varchar(50) not null,
+    data_cadastro timestamp,
+    data_atualizacao timestamp,
+    id_usuario uuid
+);
+
+CREATE TABLE endereco (
+    id UUID NOT NULL PRIMARY KEY,
+
+    -- Campos da Entidade Endereco:
+    rua VARCHAR(100) NOT NULL,
+    cep VARCHAR(9) NOT NULL,
+    cidade VARCHAR(80) NOT NULL,
+
+    -- Colunas de Auditoria e Controle (Herdadas do padrão do professor):
+    data_cadastro TIMESTAMP,
+    data_atualizacao TIMESTAMP,
+    id_usuario UUID,
+
+    -- Relacionamento ManyToOne para Cliente (Chave Estrangeira):
+    cliente_id UUID NOT NULL REFERENCES cliente(id)
+
+    -- Restrições CHK_GENERO não são necessárias aqui, pois Endereco não tem campo 'genero'
+);
