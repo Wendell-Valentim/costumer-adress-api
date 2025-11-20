@@ -1,10 +1,12 @@
 spring:
+  profiles:
+    active: local
   application:
-    name: customerapi
+    name: libraryapi
   datasource:
-    url: jdbc:postgresql://localhost:5432/customerdb
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:5432/library
+    username: ${POSTGRES_USERNAME}
+    password: ${POSTGRES_PASSWORD}
     driver-class-name: org.postgresql.Driver
   jpa:
     show-sql: true
