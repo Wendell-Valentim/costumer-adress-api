@@ -20,8 +20,8 @@ public class Endereco {
     @GeneratedValue( strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "rua", nullable = false, length = 100)
-    private String rua;
+    @Column(name = "logradouro", nullable = false, length = 100)
+    private String logradouro;
 
     @Column(name = "cep", nullable = false, length = 9)
     private String cep;

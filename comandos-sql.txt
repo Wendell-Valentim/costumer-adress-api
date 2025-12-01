@@ -12,7 +12,7 @@ CREATE TABLE endereco (
     id UUID NOT NULL PRIMARY KEY,
 
     -- Campos da Entidade Endereco:
-    rua VARCHAR(100) NOT NULL,
+    logradouro VARCHAR(100) NOT NULL,
     cep VARCHAR(9) NOT NULL,
     cidade VARCHAR(80) NOT NULL,
 

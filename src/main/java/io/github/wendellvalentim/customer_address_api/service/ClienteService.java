@@ -3,20 +3,22 @@ package io.github.wendellvalentim.customer_address_api.service;
 import io.github.wendellvalentim.customer_address_api.exceptions.RecursoNaoEncontradoException;
 import io.github.wendellvalentim.customer_address_api.exceptions.ViolacaoIntegridadeException;
 import io.github.wendellvalentim.customer_address_api.model.Cliente;
-import io.github.wendellvalentim.customer_address_api.model.Endereco;
 import io.github.wendellvalentim.customer_address_api.repository.ClienteRepository;
 import io.github.wendellvalentim.customer_address_api.repository.EnderecoRepository;
 import io.github.wendellvalentim.customer_address_api.validator.ClienteValidator;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static io.github.wendellvalentim.customer_address_api.repository.specs.ClienteSpecs.*;
 
 @Service
 @RequiredArgsConstructor
@@ -29,23 +31,44 @@ public class ClienteService {
 
     private final ClienteValidator validator;
 
-
+    @Transactional
     public Cliente salvarCliente (Cliente cliente) {
-        validator.validar(cliente);
+        cliente.setCpf(validator.formatarCpf(cliente.getCpf()));
+
+        validator.validarDataNascimento(cliente.getDataNascimento());
+
+        validator.validarDuplicidade(cliente);
+
         return repository.save(cliente);
     }
 
+
     public void atualizarCliente (Cliente cliente) {
-       if (cliente.getId() == null) {
+
+        if (cliente.getId() == null) {
            throw new IllegalArgumentException("Para atualizar o Cliente precisa estar cadastrado");
        }
-        validator.validar(cliente);
+
+        cliente.setCpf(validator.formatarCpf(cliente.getCpf()));
+
+        validator.validarDuplicidade(cliente);
+
         repository.save(cliente);
     }
 
     public Optional<Cliente> obeterPorId (UUID id) {
         return repository.findById(id);
     }
+
+    public Cliente obeterClienteEListaPorId (UUID id) {
+        Optional<Cliente> clienteEncontrado = repository.findById(id);
+        Cliente cliente = clienteEncontrado.get();
+        cliente.getEnderecos().size();
+
+        return cliente;
+    }
+
+
 
     public void deletarPorId (UUID id) {
         Cliente cliente = repository.findById(id).orElseThrow(() -> new RecursoNaoEncontradoException("Cliente não encontrado"));
@@ -55,30 +78,29 @@ public class ClienteService {
         repository.deleteById(id);
     }
 
+    @Transactional
     public void deletarPorCliente (Cliente cliente) {
         repository.delete(cliente);
     }
 
-    public List<Cliente> pesquisar(String nome, String cpf) {
+    public Page<Cliente> pesquisa(String nome, String cpf, Integer anoNascimento, Integer pagina, Integer tamanhoPagina) {
 
-
-        if (nome != null && cpf != null) {
-
-            return repository.findByCpfAndNome(cpf, nome);
-        }
-
+        Specification<Cliente> specs = Specification.where((root, query, cb) -> cb.conjunction());
 
         if (nome != null) {
-            return repository.findByNome(nome);
+            specs = specs.and(nomeLike(nome));
         }
 
-
-        if (cpf != null) {
-            return repository.findByCpf(cpf);
+        if(cpf != null) {
+            specs = specs.and(cpfEqual(cpf));
         }
 
+        if(anoNascimento != null) {
+            specs = specs.and(nascEqual(anoNascimento));
+        }
+        Pageable pageRequest = PageRequest.of(pagina, tamanhoPagina);
 
-        return repository.findAll();
+        return repository.findAll(specs, pageRequest);
     }
 
     public boolean possuiEndereco (Cliente cliente) {

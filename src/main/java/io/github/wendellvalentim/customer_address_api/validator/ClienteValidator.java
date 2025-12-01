@@ -1,11 +1,14 @@
 package io.github.wendellvalentim.customer_address_api.validator;
 
 import io.github.wendellvalentim.customer_address_api.exceptions.RegistroDuplicadoException;
+import io.github.wendellvalentim.customer_address_api.exceptions.ValidacaoIdadeException;
 import io.github.wendellvalentim.customer_address_api.model.Cliente;
 import io.github.wendellvalentim.customer_address_api.repository.ClienteRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.Optional;
 
 @Component
@@ -14,32 +17,67 @@ public class ClienteValidator {
 
     private final ClienteRepository repository;
 
-    public void validar (Cliente cliente) {
-        if(existeClienteCadastrado(cliente)) {
-            throw  new RegistroDuplicadoException("Autor ja cadastrado!");
+    public void validarDuplicidade (Cliente cliente) {
+        if(existeCpfDuplicado(cliente)) {
+            throw  new RegistroDuplicadoException("Cpf ja esta Cadastrado!");
+        }
+        if(existeNomeDuplicado(cliente)){
+            throw new RegistroDuplicadoException("Nome ja esta Cadastrado!");
         }
     }
 
-    private boolean existeClienteCadastrado(Cliente autor) {
-        Optional<Cliente> autorEncontrado = repository.findByNomeAndCpf(
-                autor.getNome(), autor.getCpf()
-        );
-
-        // 1. Se a busca por duplicado retornou vazio, não há duplicidade, então retorne false.
-        if (autorEncontrado.isEmpty()) {
-            return false;
+    public void validarDataNascimento (LocalDate cliente) {
+        if(validarDataNasc(cliente)) {
+            throw new ValidacaoIdadeException("O cliente deve ter no mínimo 18 anos para o cadastro.");
         }
-
-        // 2. SE CHEGOU AQUI, O AUTOR FOI ENCONTRADO, AGORA É SEGURO CHAMAR .GET()
-        Cliente duplicado = autorEncontrado.get();
-
-        // 3. Verifica se o encontrado é o próprio registro
-        if (autor.getId() != null && autor.getId().equals(duplicado.getId())) {
-            return false; // É ele mesmo, OK.
-        }
-
-        // 4. Se não for ele mesmo, é um DUPLICADO.
-        return true;
     }
+
+    public boolean existeCpfDuplicado (Cliente cliente) {
+
+
+        Optional<Cliente> clienteEncontrado = repository.findByCpf(cliente.getCpf());
+
+        if (cliente.getId() == null) {
+            return clienteEncontrado.isPresent();
+        }
+
+        return clienteEncontrado
+                .map(Cliente::getId)
+                .stream()
+                .anyMatch(id -> !id.equals(cliente.getId()));
+    }
+
+    public boolean existeNomeDuplicado (Cliente cliente) {
+
+
+        Optional<Cliente> clienteEncontrado = repository.findByNome(cliente.getNome());
+
+        if (cliente.getId() == null) {
+            return clienteEncontrado.isPresent();
+        }
+
+        return clienteEncontrado
+                .map(Cliente::getId)
+                .stream()
+                .anyMatch(id -> !id.equals(cliente.getId()));
+    }
+
+    public String formatarCpf(String cpfFormatado) {
+        if (cpfFormatado == null) {
+            return null;
+        }
+        return cpfFormatado.replaceAll("[^0-9]", "");
+    }
+
+    public boolean validarDataNasc (LocalDate dataNascimento) {
+
+        LocalDate dataAtual = LocalDate.now();
+
+        Period periodo = Period.between(dataNascimento, dataAtual);
+
+        return periodo.getYears() < 18;
+
+    }
+
 
 }

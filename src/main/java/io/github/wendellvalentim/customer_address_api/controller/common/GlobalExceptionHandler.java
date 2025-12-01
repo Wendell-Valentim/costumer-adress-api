@@ -2,6 +2,9 @@ package io.github.wendellvalentim.customer_address_api.controller.common;
 
 import io.github.wendellvalentim.customer_address_api.controller.dto.ApiErrorResponse;
 import io.github.wendellvalentim.customer_address_api.controller.dto.ApiFieldError;
+import io.github.wendellvalentim.customer_address_api.exceptions.RecursoNaoEncontradoException;
+import io.github.wendellvalentim.customer_address_api.exceptions.RegistroDuplicadoException;
+import io.github.wendellvalentim.customer_address_api.exceptions.ValidacaoIdadeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
@@ -25,5 +28,28 @@ public class GlobalExceptionHandler {
     return new ApiErrorResponse(HttpStatus.UNPROCESSABLE_ENTITY.value(), "Erro de validação", listaErros);
     }
 
+    @ExceptionHandler(RegistroDuplicadoException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiErrorResponse handleRegistroDuplicadoException(RegistroDuplicadoException e) {
+        return ApiErrorResponse.conflito(e.getMessage());
+    }
 
+    @ExceptionHandler(RecursoNaoEncontradoException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiErrorResponse handleRecursoNaoEncontradoException (RecursoNaoEncontradoException e) {
+        return ApiErrorResponse.repostaPadrao(e.getMessage());
+    }
+
+    @ExceptionHandler(ValidacaoIdadeException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiErrorResponse handleRecursoNaoEncontradoException (ValidacaoIdadeException e) {
+        return ApiErrorResponse.repostaPadrao(e.getMessage());
+    }
+
+
+    //@ExceptionHandler(RuntimeException.class)
+    //@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    //public ApiErrorResponse handleErrosNaoTratados (RuntimeException e) {
+        //return new ApiErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Erro inesperado, contade a admnistração!", List.of());
+    //}
 }
