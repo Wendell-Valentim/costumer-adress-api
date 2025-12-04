@@ -26,3 +26,13 @@ CREATE TABLE endereco (
 
     -- Restrições CHK_GENERO não são necessárias aqui, pois Endereco não tem campo 'genero'
 );
+
+create table usuario(
+id uuid not null primary key,
+login varchar(12) not null unique,
+senha varchar(300) not null,
+cpf varchar(11) not null unique,
+nome varchar(20) not null,
+roles varchar[]
+)
+;
