@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -27,6 +28,7 @@ public class ClienteController implements GenericController{
 
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'USUARIO', 'ADMIN')")
     public ResponseEntity<Object> salvar (@RequestBody @Valid ClienteFormDTO clienteDTO) {
 
         Cliente clienteEntity = mapper.toEntity(clienteDTO);
@@ -37,6 +39,7 @@ public class ClienteController implements GenericController{
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'USUARIO', 'ADMIN')")
     public ResponseEntity<ClienteResponseDTO> obterDetalhes (@PathVariable("id") String id) {
         var idCliente = UUID.fromString(id);
         return service.obeterPorId(idCliente)
@@ -48,6 +51,7 @@ public class ClienteController implements GenericController{
     }
 
     @GetMapping("/enderecos/{id}")
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'USUARIO', 'ADMIN')")
     public ResponseEntity<ClienteDetailReponseDTO> obterClienteEEnderecoDetalhes (@PathVariable("id") String id) {
         var idCliente = UUID.fromString(id);
         return service.obeterPorId(idCliente)
@@ -59,6 +63,7 @@ public class ClienteController implements GenericController{
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'ADMIN')")
     public ResponseEntity <Page<ClienteResponseDTO>> pesquisar (@RequestParam(value = "nome", required = false) String nome,
                                                                 @RequestParam(value = "cpf", required = false) String cpf,
                                                                 @RequestParam(value = "ano-nascimento", required = false) Integer anoNascimento,
@@ -70,6 +75,7 @@ public class ClienteController implements GenericController{
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'USUARIO', 'ADMIN')")
     public ResponseEntity<Object> atualizar (@PathVariable("id") String id, @RequestBody @Valid ClienteUpdateDTO dto) {
 
         var idCliente = UUID.fromString(id);
@@ -89,6 +95,7 @@ public class ClienteController implements GenericController{
 
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'USUARIO', 'ADMIN')")
     public ResponseEntity<Object> deletarId (@PathVariable("id") String id) {
         var idCliente = UUID.fromString(id);
         Optional<Cliente> verificarCliente = service.obeterPorId(idCliente);

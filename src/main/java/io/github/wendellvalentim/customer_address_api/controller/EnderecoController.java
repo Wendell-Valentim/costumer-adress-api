@@ -8,6 +8,7 @@ import io.github.wendellvalentim.customer_address_api.service.EnderecoService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -24,6 +25,7 @@ public class EnderecoController  implements GenericController{
     private final EnderecoMapper mapper;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'USUARIO', 'ADMIN')")
     public ResponseEntity<Void> salvar (@RequestBody @Valid EnderecoFormDTO dto) {
 
             Endereco endereco = mapper.toEntity(dto);
@@ -34,6 +36,7 @@ public class EnderecoController  implements GenericController{
     }
 
     @PutMapping("{id}")
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'USUARIO', 'ADMIN')")
     public ResponseEntity<Object> atualizar (@PathVariable("id") @Valid String id, @RequestBody EnderecoFormDTO dto){
         return service.obterPorId(UUID.fromString(id))
                 .map(endereco -> {
@@ -48,6 +51,7 @@ public class EnderecoController  implements GenericController{
     }
 
     @GetMapping("{id}")
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'USUARIO', 'ADMIN')")
     public ResponseEntity<EnderecoResponseDTO> obterDetalhes (@PathVariable("id") String id) {
         return service.obterPorId(UUID.fromString(id))
                 .map(endereco -> {
@@ -59,6 +63,7 @@ public class EnderecoController  implements GenericController{
 
 
     @DeleteMapping("{id}")
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'USUARIO', 'ADMIN')")
     public ResponseEntity<Object> deletar (@PathVariable("id") String id) {
         return service.obterPorId(UUID.fromString(id))
                 .map(endereco -> {
@@ -69,6 +74,7 @@ public class EnderecoController  implements GenericController{
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('FUNCIONARIO', 'ADMIN')")
     public ResponseEntity<List<EnderecoResponseDTO>> pesquisar (@RequestParam(value = "cep", required = false) String cep,
                                            @RequestParam(value = "logradouro", required = false) String logradouro,
                                            @RequestParam(value = "cpf-cliente", required = false) String cpfCliente

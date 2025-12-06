@@ -6,12 +6,14 @@ import io.github.wendellvalentim.customer_address_api.exceptions.RecursoNaoEncon
 import io.github.wendellvalentim.customer_address_api.exceptions.RegistroDuplicadoException;
 import io.github.wendellvalentim.customer_address_api.exceptions.ValidacaoIdadeException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,10 +48,16 @@ public class GlobalExceptionHandler {
         return ApiErrorResponse.repostaPadrao(e.getMessage());
     }
 
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiErrorResponse handleRecursoNaoEncontradoException (AccessDeniedException e) {
+        return new ApiErrorResponse( HttpStatus.FORBIDDEN.value(), "Acesso negado!", List.of());
+    }
 
-    //@ExceptionHandler(RuntimeException.class)
-    //@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    //public ApiErrorResponse handleErrosNaoTratados (RuntimeException e) {
-        //return new ApiErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Erro inesperado, contade a admnistração!", List.of());
-    //}
+
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ApiErrorResponse handleErrosNaoTratados (RuntimeException e) {
+        return new ApiErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Erro inesperado, contade a admnistração!", List.of());
+    }
 }

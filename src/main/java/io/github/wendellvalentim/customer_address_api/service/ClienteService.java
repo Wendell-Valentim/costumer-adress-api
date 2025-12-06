@@ -3,8 +3,10 @@ package io.github.wendellvalentim.customer_address_api.service;
 import io.github.wendellvalentim.customer_address_api.exceptions.RecursoNaoEncontradoException;
 import io.github.wendellvalentim.customer_address_api.exceptions.ViolacaoIntegridadeException;
 import io.github.wendellvalentim.customer_address_api.model.Cliente;
+import io.github.wendellvalentim.customer_address_api.model.Usuario;
 import io.github.wendellvalentim.customer_address_api.repository.ClienteRepository;
 import io.github.wendellvalentim.customer_address_api.repository.EnderecoRepository;
+import io.github.wendellvalentim.customer_address_api.security.SecurityService;
 import io.github.wendellvalentim.customer_address_api.validator.ClienteValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,6 +33,8 @@ public class ClienteService {
 
     private final ClienteValidator validator;
 
+    private final SecurityService securityService;
+
     @Transactional
     public Cliente salvarCliente (Cliente cliente) {
         cliente.setCpf(validator.formatarCpf(cliente.getCpf()));
@@ -52,6 +56,10 @@ public class ClienteService {
         cliente.setCpf(validator.formatarCpf(cliente.getCpf()));
 
         validator.validarDuplicidade(cliente);
+
+        Optional<Usuario> usuario= securityService.obterUsuarioLogado();
+
+        cliente.setIdUsuario(usuario.get().getId());
 
         repository.save(cliente);
     }

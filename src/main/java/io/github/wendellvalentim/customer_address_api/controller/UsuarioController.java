@@ -1,5 +1,6 @@
-package io.github.wendellvalentim.customer_address_api.controller.dto.usuario;
+package io.github.wendellvalentim.customer_address_api.controller;
 
+import io.github.wendellvalentim.customer_address_api.controller.dto.usuario.UsuarioFormDTO;
 import io.github.wendellvalentim.customer_address_api.controller.mappers.UsuarioMapper;
 import io.github.wendellvalentim.customer_address_api.model.Usuario;
 import io.github.wendellvalentim.customer_address_api.service.UsuarioService;
